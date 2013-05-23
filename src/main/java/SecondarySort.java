@@ -41,7 +41,7 @@ public class SecondarySort {
 				if (cmp != 0) {
 					return cmp;
 				}
-				return -w1.getSecond().compareTo(w2.getSecond());
+				return -1 * (w1.getSecond().compareTo(w2.getSecond()));
 			}
 		}
 
@@ -103,6 +103,9 @@ public class SecondarySort {
 			}
 		}
 
+		public String toString(){
+			return first + " " + second;
+		}
 	}
 
 	public static class FirstPartitioner extends
