@@ -28,25 +28,31 @@ public class SecondarySort {
 
 		public static class KeyComparator extends WritableComparator {
 
-			static {
+			/*static {
 				WritableComparator.define(Pair.class, new KeyComparator());
-			}
+			}*/
 
 			public KeyComparator() {
 				super(Pair.class, true);
 			}
 
 			public int compare(Pair w1, Pair w2) {
-				Pair p1 = (Pair) w1;
-				Pair p2 = (Pair) w2;
-				int cmp = p1.getFirst() - p2.getFirst();
+				int cmp = w1.getFirst() - w2.getFirst();
 				if (cmp != 0) {
 					return cmp;
 				}
-				return -p1.getSecond().compareTo(p2.getSecond());
+				return -w1.getSecond().compareTo(w2.getSecond());
 			}
 		}
 
+		/** 此默认的无参构造方法非常重要，缺失会导致异常
+		 * Caused by: java.lang.NoSuchMethodException: SecondarySort$Pair.<init>()
+			at java.lang.Class.getConstructor0(Class.java:2730)
+			at java.lang.Class.getDeclaredConstructor(Class.java:2004)
+			at org.apache.hadoop.util.ReflectionUtils.newInstance(ReflectionUtils.java:109)
+		 */
+		public Pair(){}
+		
 		public Pair(int first, String second) {
 			this.first = first;
 			this.second = second;
@@ -113,10 +119,7 @@ public class SecondarySort {
 		}
 
 		public int compare(Pair w1, Pair w2) {
-			Pair p1 = (Pair) w1;
-			Pair p2 = (Pair) w2;
-
-			return p1.getFirst() - p2.getFirst();
+			return w1.getFirst() - w2.getFirst();
 		}
 	}
 
@@ -153,12 +156,13 @@ public class SecondarySort {
 
 		Job job = new Job(conf, "secondary sort");
 		job.setJarByClass(SecondarySort.class);
-		job.setMapperClass(Mapper.class);
-		job.setReducerClass(Reducer.class);
+		job.setMapperClass(OrderMapper.class);
+		job.setReducerClass(OrderReducer.class);
 
 		// group and partition by the first int in the pair
 		job.setPartitionerClass(FirstPartitioner.class);
 		job.setGroupingComparatorClass(GroupComparator.class);
+		job.setSortComparatorClass(Pair.KeyComparator.class);
 
 		// the map output is Pair, NullWritable
 		job.setMapOutputKeyClass(Pair.class);
